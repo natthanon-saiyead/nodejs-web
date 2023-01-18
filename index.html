@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chat</title>
+</head>
+
+<body>
+    <h1>Chat</h1>
+
+    <form id="nickname-form">
+        <label for="nickname">Nickname:</label>
+        <input id="nickname" type="text" required>
+        <button type="submit">Join</button>
+    </form>
+
+    <div id="chat-container" style="display: none;">
+        <div id="chat"></div>
+        <p id="typing" style="display: none;"></p>
+        <form id="message-form">
+            <input id="message" type="text">
+            <button type="submit">Send</button>
+        </form>
+
+    </div>
+
+    <h2>Online</h2>
+    <ul id="user-list"></ul>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        // Display a message when a user joins
+        socket.on('user joined', function (nickname) {
+            console.log('joined', nickname);
+            const message = `${nickname} joined the chat`;
+            displayMessage(message);
+        });
+
+        // Display a message when a user leaves
+        socket.on('user left', function (nickname) {
+            const message = `${nickname} left the chat`;
+            displayMessage(message);
+        });
+
+        // Update the list of online users
+        socket.on('update users', function (users) {
+            const userList = document.getElementById('user-list');
+            userList.innerHTML = '';
+            for (const user of users) {
+                const li = document.createElement('li');
+                li.textContent = user;
+                userList.appendChild(li);
+            }
+        });
+
+        // Display a message when a user is typing
+        socket.on('typing', function (nickname) {
+            const message = `${nickname} is typing...`;
+            displayTyping(message);
+        });
+
+        // Hide the "is typing" message when a user stops typing
+        socket.on('stop typing', function (nickname) {
+            hideTyping();
+        });
+
+        socket.on('receive message', function (nickname, message) {
+            console.log(nickname, message);
+            const chat = document.getElementById('chat');
+            const p = document.createElement('p');
+            p.textContent = `${nickname}: ${message}`;
+            chat.appendChild(p);
+            console.log(chat.innerHTML)
+        });
+
+
+        // Send a message when the user submits the form
+        const form = document.getElementById('message-form');
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const input = document.getElementById('message');
+            const message = input.value;
+            console.log('send message to server',message)
+            socket.emit('send message', message);
+            input.value = '';
+        });
+
+        // Send a "typing" event when the user is typing
+        const input = document.getElementById('message');
+        input.addEventListener('input', function () {
+            socket.emit('typing');
+        });
+
+        // Set the nickname when the form is submitted
+        const nicknameForm = document.getElementById('nickname-form');
+        nicknameForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            const nicknameInput = document.getElementById('nickname');
+            const nickname = nicknameInput.value;
+            console.log("send nickname to server", nickname);
+            document.getElementById("chat-container").style.display = "block";
+            socket.emit('set nickname', nickname);
+        });
+
+        // Display a message in the chat window
+        function displayMessage(message) {
+            console.log(message);
+            const p = document.createElement('p');
+            p.textContent = message;
+            const chat = document.getElementById('chat');
+            chat.appendChild(p);
+            console.log(chat.innerHTML);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        // Display the "is typing" message
+        function displayTyping(message) {
+            const p = document.getElementById('typing');
+            p.textContent = message;
+            p.style.display = 'block';
+        }
+
+        // Hide the "is typing" message
+        function hideTyping() {
+            const p = document.getElementById('typing');
+            p.style.display = 'none';
+        }
+    </script>
+
+</body>
+
+</html>
