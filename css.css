@@ -1,0 +1,14 @@
+body {
+    background-color: rgb(201, 236, 241);
+}
+
+h1 {
+    color: blue;
+    font-family: verdana;
+    font-size: 300%;
+}
+
+h2 {
+    color: rgb(6, 203, 55);
+    font-family: verdana;
+}
