@@ -4,6 +4,7 @@
 <head>
     <title>Chat</title>
 </head>
+<link rel="stylesheet" href="css.css">
 
 <body>
     <h1>Chat</h1>
@@ -32,20 +33,20 @@
         const socket = io();
 
         // Display a message when a user joins
-        socket.on('user joined', function (nickname) {
+        socket.on('user joined', function(nickname) {
             console.log('joined', nickname);
             const message = `${nickname} joined the chat`;
             displayMessage(message);
         });
 
         // Display a message when a user leaves
-        socket.on('user left', function (nickname) {
+        socket.on('user left', function(nickname) {
             const message = `${nickname} left the chat`;
             displayMessage(message);
         });
 
         // Update the list of online users
-        socket.on('update users', function (users) {
+        socket.on('update users', function(users) {
             const userList = document.getElementById('user-list');
             userList.innerHTML = '';
             for (const user of users) {
@@ -56,17 +57,17 @@
         });
 
         // Display a message when a user is typing
-        socket.on('typing', function (nickname) {
+        socket.on('typing', function(nickname) {
             const message = `${nickname} is typing...`;
             displayTyping(message);
         });
 
         // Hide the "is typing" message when a user stops typing
-        socket.on('stop typing', function (nickname) {
+        socket.on('stop typing', function(nickname) {
             hideTyping();
         });
 
-        socket.on('receive message', function (nickname, message) {
+        socket.on('receive message', function(nickname, message) {
             console.log(nickname, message);
             const chat = document.getElementById('chat');
             const p = document.createElement('p');
@@ -78,24 +79,24 @@
 
         // Send a message when the user submits the form
         const form = document.getElementById('message-form');
-        form.addEventListener('submit', function (event) {
+        form.addEventListener('submit', function(event) {
             event.preventDefault();
             const input = document.getElementById('message');
             const message = input.value;
-            console.log('send message to server',message)
+            console.log('send message to server', message)
             socket.emit('send message', message);
             input.value = '';
         });
 
         // Send a "typing" event when the user is typing
         const input = document.getElementById('message');
-        input.addEventListener('input', function () {
+        input.addEventListener('input', function() {
             socket.emit('typing');
         });
 
         // Set the nickname when the form is submitted
         const nicknameForm = document.getElementById('nickname-form');
-        nicknameForm.addEventListener('submit', function (event) {
+        nicknameForm.addEventListener('submit', function(event) {
             event.preventDefault();
             const nicknameInput = document.getElementById('nickname');
             const nickname = nicknameInput.value;
